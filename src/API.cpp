@@ -247,7 +247,8 @@ std::string LLMoney_GetHist(std::string xuid, int timediff) {
         while (get.executeStep()) {
             std::string              fromXuid = get.getColumn(0).getString();
             std::string              toXuid   = get.getColumn(1).getString();
-            std::string              fromName, toName = "System";
+            // std::string              fromName, toName = "System";
+            std::string              fromName = "System", toName = "System";
             ll::service::PlayerInfo& info      = ll::service::PlayerInfo::getInstance();
             auto                     fromEntry = fromXuid.empty() ? std::nullopt : info.fromXuid(fromXuid);
             auto                     toEntry   = toXuid.empty() ? std::nullopt : info.fromXuid(toXuid);
