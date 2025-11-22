@@ -190,7 +190,8 @@ void RegisterMoneyCommands() {
                     if (info.has_value()) {
                         Actor* fromActor = origin.getEntity();
                         if (fromActor) {
-                            LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount);
+                            // LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount);
+                            LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount, "payment");
                         } else {
                             output.error("Origin not found!"_tr());
                         }
