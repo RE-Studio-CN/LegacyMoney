@@ -191,7 +191,21 @@ void RegisterMoneyCommands() {
                         Actor* fromActor = origin.getEntity();
                         if (fromActor) {
                             // LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount);
-                            LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount, "payment");
+                            bool result = LLMoney_Trans(
+                                static_cast<Player*>(fromActor)->getXuid(), 
+                                info->xuid, 
+                                param.amount, 
+                                "payment"
+                            );
+
+                            if (result) {
+                                output.success(
+                                    "Paid "_tr() + legacy_money::getConfig().currency_symbol + std::to_string(param.amount) + 
+                                    " to "_tr() + info->name
+                                );
+                            } else {
+                                output.error("Failed to pay money"_tr());
+                            }
                         } else {
                             output.error("Origin not found!"_tr());
                         }
