@@ -19,5 +19,10 @@
     "Clear history successfully": "清空历史记录成功",
     "Money ranking:": "金钱排行榜:",
     "Failed to load configuration": "加载配置文件失败",
-    "Failed to rewrite configuration": "重写配置文件失败"
+    "Failed to rewrite configuration": "重写配置文件失败",
+    "Paid": "支付了",
+    "Transfer amount exceeds the single limit: ": "转账金额超过单次上限: ",
+    "Daily transfer limit reached (": "已达到每日转账次数限制 (",
+    " times)": " 次)",
+    "Daily transfer amount limit reached. You can still transfer: ": "已达到每日转账总额限制。你今日剩余额度: "
 }

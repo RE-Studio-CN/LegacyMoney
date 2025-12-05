@@ -190,7 +190,33 @@ void RegisterMoneyCommands() {
                     if (info.has_value()) {
                         Actor* fromActor = origin.getEntity();
                         if (fromActor) {
-                            // LLMoney_Trans(static_cast<Player*>(fromActor)->getXuid(), info->xuid, param.amount);
+                            auto* player = static_cast<Player*>(fromActor);
+                            std::string xuid = player->getXuid();
+                            auto& cfg = legacy_money::getConfig();
+                            // 检查单次转账限制
+                            if (cfg.max_single_pay > 0 && param.amount > cfg.max_single_pay) {
+                                output.error("Transfer amount exceeds the single limit: "_tr() + 
+                                    cfg.currency_symbol + std::to_string(cfg.max_single_pay));
+                                break;
+                            }
+
+                            // 获取今日统计数据,只有启用每日限制时才去查数据库
+                            if (cfg.max_daily_pay_amount > 0 || cfg.max_daily_pay_times > 0) {
+                                auto [dailyTotal, dailyTimes] = LLMoney_GetDailyPayStats(xuid);
+                                // 检查每日次数限制
+                                if (cfg.max_daily_pay_times > 0 && dailyTimes >= cfg.max_daily_pay_times) {
+                                    output.error("Daily transfer limit reached ("_tr() + 
+                                        std::to_string(cfg.max_daily_pay_times) + " times)"_tr());
+                                    break;
+                                }
+
+                                // 检查每日总金额限制
+                                if (cfg.max_daily_pay_amount > 0 && (dailyTotal + param.amount) > cfg.max_daily_pay_amount) {
+                                    output.error("Daily transfer amount limit reached. You can still transfer: "_tr() + 
+                                        cfg.currency_symbol + std::to_string(cfg.max_daily_pay_amount - dailyTotal));
+                                    break;
+                                }
+                            }
                             bool result = LLMoney_Trans(
                                 static_cast<Player*>(fromActor)->getXuid(), 
                                 info->xuid, 

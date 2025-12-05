@@ -315,3 +315,27 @@ void ConvertData() {
         legacy_money::LegacyMoney::getInstance().getSelf().getLogger().info("Conversion completed");
     }
 }
+
+std::pair<long long, int> LLMoney_GetDailyPayStats(std::string xuid) {
+    if (xuid.empty()) return {0, 0};
+    
+    try {
+        // 查询条件: 作为发送方 (tFrom) , 且过去 24 小时内
+        // COALESCE 确保如果没有记录则返回 0 而不是NULL
+        SQLite::Statement query{
+            *db, 
+            "SELECT COALESCE(SUM(Money), 0), COUNT(*) FROM mtrans WHERE tFrom = ? AND strftime('%s', 'now') - Time < 86400"
+        };
+        
+        query.bindNoCopy(1, xuid);
+        
+        if (query.executeStep()) {
+            long long totalAmount = query.getColumn(0).getInt64();
+            int       totalTimes  = query.getColumn(1).getInt();
+            return {totalAmount, totalTimes};
+        }
+    } catch (std::exception const& e) {
+        legacy_money::LegacyMoney::getInstance().getSelf().getLogger().error("Database error in stats: {}\n", e.what());
+    }
+    return {0, 0};
+}
