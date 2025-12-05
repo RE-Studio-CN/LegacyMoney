@@ -153,11 +153,11 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
 
         std::string finalNote = note;
         if (!from.empty() && !to.empty()) {
-            finalNote += "§r | §oSrc:§u" + std::to_string(fNewBal) + "§r | §oDst:§u" + std::to_string(tNewBal) + "§r";
+            finalNote += "§r | Src:§o§u" + std::to_string(fNewBal) + "§r | Dst:§o§u" + std::to_string(tNewBal) + "§r";
         } else if (!from.empty()) {
-            finalNote += "§r | §oBal:§u" + std::to_string(fNewBal) + "§r";
+            finalNote += "§r | Bal:§o§u" + std::to_string(fNewBal) + "§r";
         } else if (!to.empty()) {
-            finalNote += "§r | §oBal:§u" + std::to_string(tNewBal) + "§r";
+            finalNote += "§r | Bal:§o§u" + std::to_string(tNewBal) + "§r";
         }
 
         {
@@ -189,7 +189,7 @@ bool LLMoney_Add(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans({}, xuid, money, "add §u" + std::to_string(money));
+    bool res    = LLMoney_Trans({}, xuid, money, "add §u§o" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Add, {}, xuid, money);
     return res;
 }
@@ -200,7 +200,7 @@ bool LLMoney_Reduce(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans(xuid, {}, money, "reduce §u" + std::to_string(money));
+    bool res    = LLMoney_Trans(xuid, {}, money, "reduce §u§o" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Reduce, {}, xuid, money);
     return res;
 }
@@ -220,7 +220,7 @@ bool LLMoney_Set(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans(from, to, diff, "set to §u" + std::to_string(money));
+    bool res    = LLMoney_Trans(from, to, diff, "set to §u§o" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Set, {}, xuid, money);
     return res;
 }

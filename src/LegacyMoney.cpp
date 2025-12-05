@@ -205,7 +205,6 @@ void RegisterMoneyCommands() {
                             // 获取今日统计数据,只有启用每日限制时才去查数据库
                             if (cfg.max_daily_pay_amount > 0 || cfg.max_daily_pay_times > 0) {
                                 auto [dailyTotal, dailyTimes] = LLMoney_GetDailyPayStats(xuid);
-                                // 检查每日次数限制
                                 if (cfg.max_daily_pay_times > 0 && dailyTimes >= cfg.max_daily_pay_times) {
                                     output.error("Daily transfer limit reached ("_tr() + 
                                         std::to_string(cfg.max_daily_pay_times) + " times)"_tr());
