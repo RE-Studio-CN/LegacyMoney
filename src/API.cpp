@@ -107,6 +107,10 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
     try {
         db->exec("begin");
         SQLite::Statement set{*db, "update money set Money=? where XUID=?"};
+        
+        long long fNewBal = 0;
+        long long tNewBal = 0;
+
         if (!from.empty()) {
             auto fmoney = LLMoney_Get(from);
             if (fmoney < val) {
@@ -114,6 +118,8 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
                 return false;
             }
             fmoney -= val;
+            fNewBal = fmoney;
+
             {
                 set.bindNoCopy(2, from);
                 set.bind(1, fmoney);
@@ -122,6 +128,7 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
                 set.clearBindings();
             }
         }
+        
         if (!to.empty()) {
             auto tmoney = LLMoney_Get(to);
             if (from.empty()) {
@@ -133,6 +140,8 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
                 db->exec("rollback");
                 return false;
             }
+            tNewBal = tmoney;
+
             {
                 set.bindNoCopy(2, to);
                 set.bind(1, tmoney);
@@ -142,12 +151,21 @@ bool LLMoney_Trans(std::string from, std::string to, long long val, std::string 
             }
         }
 
+        std::string finalNote = note;
+        if (!from.empty() && !to.empty()) {
+            finalNote += "§r | §oSrc:§u" + std::to_string(fNewBal) + "§r | §oDst:§u" + std::to_string(tNewBal) + "§r";
+        } else if (!from.empty()) {
+            finalNote += "§r | §oBal:§u" + std::to_string(fNewBal) + "§r";
+        } else if (!to.empty()) {
+            finalNote += "§r | §oBal:§u" + std::to_string(tNewBal) + "§r";
+        }
+
         {
             SQLite::Statement addTrans{*db, "insert into mtrans (tFrom,tTo,Money,Note) values (?,?,?,?)"};
             addTrans.bindNoCopy(1, from);
             addTrans.bindNoCopy(2, to);
             addTrans.bind(3, val);
-            addTrans.bindNoCopy(4, note);
+            addTrans.bindNoCopy(4, finalNote);
             addTrans.exec();
             addTrans.reset();
             addTrans.clearBindings();
@@ -171,7 +189,7 @@ bool LLMoney_Add(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans({}, xuid, money, "add " + std::to_string(money));
+    bool res    = LLMoney_Trans({}, xuid, money, "add §u" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Add, {}, xuid, money);
     return res;
 }
@@ -182,7 +200,7 @@ bool LLMoney_Reduce(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans(xuid, {}, money, "reduce " + std::to_string(money));
+    bool res    = LLMoney_Trans(xuid, {}, money, "reduce §u" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Reduce, {}, xuid, money);
     return res;
 }
@@ -202,7 +220,7 @@ bool LLMoney_Set(std::string xuid, long long money) {
     }
 
     isRealTrans = false;
-    bool res    = LLMoney_Trans(from, to, diff, "set to " + std::to_string(money));
+    bool res    = LLMoney_Trans(from, to, diff, "set to §u" + std::to_string(money));
     if (res) CallAfterEvent(LLMoneyEvent::Set, {}, xuid, money);
     return res;
 }
@@ -247,19 +265,29 @@ std::string LLMoney_GetHist(std::string xuid, int timediff) {
         while (get.executeStep()) {
             std::string              fromXuid = get.getColumn(0).getString();
             std::string              toXuid   = get.getColumn(1).getString();
-            // std::string              fromName, toName = "System";
+
             std::string              fromName = "System", toName = "System";
+            
             ll::service::PlayerInfo& info      = ll::service::PlayerInfo::getInstance();
             auto                     fromEntry = fromXuid.empty() ? std::nullopt : info.fromXuid(fromXuid);
             auto                     toEntry   = toXuid.empty() ? std::nullopt : info.fromXuid(toXuid);
-            if (fromEntry) {
-                fromName = fromEntry->name;
-            }
-            if (toEntry) {
-                toName = toEntry->name;
-            }
-            rv += fromName + " -> " + toName + " " + std::to_string((long long)get.getColumn(2).getInt64()) + " "
-                + get.getColumn(3).getText() + " (" + get.getColumn(4).getText() + ")\n";
+            if (fromEntry) fromName = fromEntry->name;
+            if (toEntry)   toName = toEntry->name;
+            
+            std::string fromColor;
+            if (fromXuid == xuid)      fromColor = "§a";
+            else if (fromXuid.empty()) fromColor = "§c";
+            else                       fromColor = "§e";
+
+            std::string toColor;
+            if (toXuid == xuid)        toColor = "§a";
+            else if (toXuid.empty())   toColor = "§c";
+            else                       toColor = "§e";
+
+            rv += "§r§i" + std::string(get.getColumn(3).getText()) + "§r " 
+                + fromColor + fromName + " §r§l->§r " + toColor + toName + " §d" 
+                + std::to_string((long long)get.getColumn(2).getInt64()) 
+                + " §r(" + get.getColumn(4).getText() + ")§r\n";
         }
         get.reset();
         get.clearBindings();

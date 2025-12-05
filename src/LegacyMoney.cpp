@@ -129,9 +129,11 @@ void RegisterMoneyCommands() {
                     auto info = ll::service::PlayerInfo::getInstance().fromName(param.playerName);
                     if (info.has_value()) {
                         if (LLMoney_Add(info->xuid, param.amount)) {
+                            long long currentBal = LLMoney_Get(info->xuid);
                             output.success(
-                                "Added "_tr() + legacy_money::getConfig().currency_symbol + std::to_string(param.amount)
-                                + " to "_tr() + param.playerName
+                                "Reduced "_tr() + legacy_money::getConfig().currency_symbol
+                                + std::to_string(param.amount) + " to "_tr() + param.playerName +
+                                "\n" + param.playerName + "'s balance: "_tr() + legacy_money::getConfig().currency_symbol + std::to_string(currentBal)
                             );
                         } else {
                             output.error("Failed to add money"_tr());
@@ -210,7 +212,6 @@ void RegisterMoneyCommands() {
                                     break;
                                 }
 
-                                // 检查每日总金额限制
                                 if (cfg.max_daily_pay_amount > 0 && (dailyTotal + param.amount) > cfg.max_daily_pay_amount) {
                                     output.error("Daily transfer amount limit reached. You can still transfer: "_tr() + 
                                         cfg.currency_symbol + std::to_string(cfg.max_daily_pay_amount - dailyTotal));
@@ -260,9 +261,11 @@ void RegisterMoneyCommands() {
                             auto it = param.player.results(origin).data;
                             for (Player* player : *it) {
                                 if (LLMoney_Add(player->getXuid(), param.amount)) {
+                                    long long currentBal = LLMoney_Get(player->getXuid());
                                     output.success(
                                         "Added "_tr() + legacy_money::getConfig().currency_symbol
-                                        + std::to_string(param.amount) + " to "_tr() + player->getRealName()
+                                        + std::to_string(param.amount) + " to "_tr() + player->getRealName() +
+                                        " ("_tr() + legacy_money::getConfig().currency_symbol + std::to_string(currentBal) + ")"
                                     );
                                 } else {
                                     output.error("Failed to reduce money"_tr());
