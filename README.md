@@ -28,9 +28,13 @@ lip install github.com/LiteLDev/LegacyMoney
 
 ```jsonc
 {
-    "currency_symbol": "$",
-    "def_money": 0, // Default money value
+    "version": 2,
+    "def_money": 0,
+    "pay_tax": 0.0,
     "enable_commands": true,
-    "pay_tax": 0.0
+    "currency_symbol": "$",
+    "max_single_pay": 0,
+    "max_daily_pay_amount": 0,
+    "max_daily_pay_times": 0
 }
 ```

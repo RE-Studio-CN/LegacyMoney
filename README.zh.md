@@ -1,7 +1,7 @@
 # LegacyMoney
 
 [English](README.md) | 简体中文  
-LeviLamina的经典版LiteLoaderMoney
+LeviLamina 的经典版 LiteLoaderMoney ，但是进行了修改
 
 # 安装
 
@@ -28,9 +28,13 @@ lip install github.com/LiteLDev/LegacyMoney
 
 ```jsonc
 {
-    "currency_symbol": "$", // 货币符号
-    "def_money": 0, // 玩家初始金额
-    "enable_commands": true, // 启用money指令
-    "pay_tax": 0.0 // 转账税率
+    "version": 2,
+    "def_money": 0,             // 玩家初始金额
+    "pay_tax": 0.0,             // 转账税率
+    "enable_commands": true,    // 启用money指令
+    "currency_symbol": "$",     // 货币符号
+    "max_single_pay": 0,        // 单次转账最大限制
+    "max_daily_pay_amount": 0,  // 每日转账总额限制
+    "max_daily_pay_times": 0    // 每日转账次数限制
 }
 ```
