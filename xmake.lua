@@ -1,25 +1,23 @@
 add_rules("mode.debug", "mode.release")
 
-add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
-
-if is_config("target_type", "server") then
-    add_requires("levilamina", {configs = {target_type = "server"}})
-else
-    add_requires("levilamina", {configs = {target_type = "client"}})
-end
-
-add_requires("levibuildscript")
-add_requires("sqlitecpp 3.3.3")
-
-if not has_config("vs_runtime") then
-    set_runtimes("MD")
-end
+add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
 
 option("target_type")
     set_default("server")
     set_showmenu(true)
     set_values("server", "client")
 option_end()
+
+-- add_requires("levilamina x.x.x") for a specific version
+-- add_requires("levilamina develop") to use develop version
+-- please note that you should add bdslibrary yourself if using dev version
+add_requires("levilamina", {configs = {target_type = get_config("target_type")}})
+
+add_requires("levibuildscript", "sqlitecpp 3.3.3")
+
+if not has_config("vs_runtime") then
+    set_runtimes("MD")
+end
 
 target("LegacyMoney")
     add_rules("@levibuildscript/linkrule")
@@ -31,15 +29,16 @@ target("LegacyMoney")
     set_kind("shared")
     set_languages("c++20")
     set_symbols("debug")
+    add_headerfiles("src/**.h")
     add_files("src/**.cpp")
     add_includedirs("src")
-    -- if is_config("target_type", "server") then
-    --     add_includedirs("src-server")
-    --     add_files("src-server/**.cpp")
-    -- else
-    --     add_includedirs("src-client")
-    --     add_files("src-client/**.cpp")
-    -- end
+    if is_config("target_type", "server") then
+    --  add_includedirs("src-server")
+    --  add_files("src-server/**.cpp")
+    else
+    --  add_includedirs("src-client")
+    --  add_files("src-client/**.cpp")
+    end
     after_build(function (target)
         local bindir = path.join(os.projectdir(), "bin")
         local includedir = path.join(bindir, "include")

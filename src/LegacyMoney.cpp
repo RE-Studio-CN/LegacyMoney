@@ -56,8 +56,10 @@ struct TopMoney {
 
 void RegisterMoneyCommands() {
     using ll::command::CommandRegistrar;
-    auto& command =
-        ll::command::CommandRegistrar::getInstance().getOrCreateCommand("money", "LegacyMoney's main command"_tr());
+    auto& command = ll::command::CommandRegistrar::getInstance(false).getOrCreateCommand(
+        "money",
+        "LegacyMoney's main command"_tr()
+    );
     command.overload<QueryMoney>()
         .text("query")
         .optional("playerName")
@@ -422,7 +424,7 @@ LegacyMoney& LegacyMoney::getInstance() {
     static LegacyMoney instance;
     return instance;
 }
-MoneyConfig                         config;
+MoneyConfig config;
 
 bool loadConfig() {
     try {
